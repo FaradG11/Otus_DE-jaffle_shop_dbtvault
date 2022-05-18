@@ -1,8 +1,8 @@
 {{ config(materialized='table') }}
 
 {%- set datepart = "day" -%}
-{%- set start_date = "TO_DATE('2022/05/01', 'yyyy/mm/dd')" -%}
-{%- set end_date = "TO_DATE('2022/06/01', 'yyyy/mm/dd')" -%}
+{%- set start_date = "TO_DATE('2022/05/15', 'yyyy/mm/dd')" -%}
+{%- set end_date = "TO_DATE('2022/06/15', 'yyyy/mm/dd')" -%}
 
 WITH as_of_date AS (
     {{ dbt_utils.date_spine(datepart=datepart,

@@ -43,3 +43,6 @@ models:
       sats:
         tags:
           - 'satellite'
+    marts:
+      tags:
+        - 'marts'

@@ -1,31 +1,45 @@
-{{ config(materialized='pit_incremental') }}
+WITH as_of_dates AS (
+    SELECT *
+    FROM {{ ref('as_of_date') }}
+),
 
-{%- set yaml_metadata -%}
-source_model: HUB_CUSTOMER
-src_pk: CUSTOMER_PK
-as_of_dates_table: AS_OF_DATE
-satellites:
-  SAT_CUSTOMER_DETAILS:
-    pk:
-      PK: CUSTOMER_PK
-    ldts:
-      LDTS: LOAD_DATE
-stage_tables:
-  V_STG_CUSTOMERS: LOAD_DATE
-src_ldts: LOAD_DATE
-{%- endset -%}
 
-{% set metadata_dict = fromyaml(yaml_metadata) %}
+new_rows_as_of_date AS (
+    SELECT
+        a.CUSTOMER_PK,
+        b.AS_OF_DATE
+    FROM {{ ref('sat_customer_details') }} AS a
+    INNER JOIN as_of_dates AS b
+    ON (1=1)
+),
 
-{% set source_model = metadata_dict['source_model'] %}
-{% set src_pk = metadata_dict['src_pk'] %}
-{% set as_of_dates_table = metadata_dict['as_of_dates_table'] %}
-{% set satellites = metadata_dict['satellites'] %}
-{% set stage_tables = metadata_dict['stage_tables'] %}
-{% set src_ldts = metadata_dict['src_ldts'] %}
+new_rows AS (
+    SELECT
+        a.customer_pk,
+        a.first_name,
+        a.last_name,
+        a.email,
+        c.country,
+        c.age,
+        a.effective_from,
+        b.as_of_date AS actual_dt
+    FROM new_rows_as_of_date AS b
+    LEFT JOIN  {{ ref('sat_customer_details') }} AS a
+        ON a.customer_pk = b.customer_pk
+        AND a.effective_from <= b.as_of_date
+    LEFT JOIN  {{ ref('sat_customer_country_age') }} AS c
+        ON c.customer_pk = b.customer_pk
+        AND c.effective_from <= b.as_of_date
 
-{{ dbtvault.pit(source_model=source_model, src_pk=src_pk,
-                as_of_dates_table=as_of_dates_table,
-                satellites=satellites,
-                stage_tables=stage_tables,
-                src_ldts=src_ldts) }}
+),
+
+pit AS (
+    SELECT * FROM new_rows
+    WHERE (customer_pk, effective_from, actual_dt) IN (
+        SELECT customer_pk, MAX(effective_from), actual_dt
+        FROM new_rows
+        GROUP BY 1,3
+    )
+)
+
+SELECT DISTINCT * FROM pit

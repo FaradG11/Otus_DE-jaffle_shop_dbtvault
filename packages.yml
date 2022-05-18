@@ -3,3 +3,5 @@ packages:
     revision: master
 #  - git: "https://github.com/dbt-labs/dbt-utils.git"
 #    revision: main
+#  - package: Datavault-UK/dbtvault
+#    version: 0.7.3
