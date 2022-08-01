@@ -1,32 +1,47 @@
-## Environment setup
+# Моделирование данных в Хранилище (с использованием Data Vault и dbt)
 
-Either use `pipenv` for Virtual Environment or Docker container
+## Цели задания:
 
-### Python virtual enironment
+- Моделирование данных в Data Warehouse: нормализация, обогащение, интеграция, единая логическая модель, витрины данных и расчет метрик
+- Развертывание окружения: СУБД + dbt
+- Конфигурация проекта dbt, установка модуля dbtVault
+- Проектирование детального слоя на базе подхода Data Vault, подготовка метаданных для кодогенерации
+- Автоматизация наполнения детального слоя данных с помощью dbt + dbtVault
+- Формирование витрин данных на основе детального слоя
 
-Sync dependencies of specific versions and open subshell:
+## Ход выполнения:
 
-```bash
-pipenv sync
-pipenv shell
-
-dbt --version
-dbt debug
-```
-
-### Docker
-
-1. Launch containers with dbt and postgres
-2. Enter dbt container for interactive session
-
-```bash
-docker-compose up -d
-docker-compose exec dbt bash
-
-dbt --version
-dbt debug
-```
-
-Or simply attach shell in VS Code:
-
-![](https://habrastorage.org/webt/rc/v9/-k/rcv9-ktw8dlyfyh_rklhigeqgse.png)
+1. Развертывание окружения: СУБД + dbt
+ - Берем за основу репозиторий https://github.com/kzzzr/jaffle_shop_dbtvault 
+ - Устонавливаем СУБД Postgres (Docker)
+ - Устанавливаем утилиту CLI dbt
+2. Установка модуля dbtVault
+3. Проектирование детального слоя на базе Data Vault.
+  - настройка конфигураций /dbt_project.yml
+  - загрузка исходных данных ./data/ в формате .csv
+  - настройка конфигурации dbt sources в models/schema.yml
+4. Наполнение данных
+  - Загрузка .csv из репо в таблицы исходных данных 
+  ~~~
+  dbt seed
+  ~~~
+  - Формирование слоя staging:
+  ~~~
+  dbt run -m tag:stage
+  ~~~
+  -  Формирование слоя Data Vault:
+  ~~~
+  dbt run -m tag:raw_vault
+  ~~~  
+  
+5. Инициация изменений в исходных данных:
+  ~~~
+  dbt seed —-full-refresh
+  dbt run -m tag:stage
+  dbt run -m tag:raw_vault
+  ~~~  
+  
+ 6. Создание витрины данных над Data Vault
+ - Динамика изменения количества заказов в разрезе календарной недели и статуса заказа
+ - Представление Point-in-time, которое показывает актуальные атрибуты клиента (first name, last name, email) на заданный момент времени.
+ 
