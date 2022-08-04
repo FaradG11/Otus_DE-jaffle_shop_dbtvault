@@ -42,6 +42,12 @@
   ~~~  
   
  6. Создание витрины данных над Data Vault
- - Динамика изменения количества заказов в разрезе календарной недели и статуса заказа
- - Представление Point-in-time, которое показывает актуальные атрибуты клиента (first name, last name, email) на заданный момент времени.
+
+**Динамика изменения количества заказов в разрезе календарной недели и статуса заказа**
+
+![orders_per_week](https://github.com/FaradG11/Otus_DE-jaffle_shop_dbtvault/blob/16f03982ad99d5afde8cff1f61b838979cb6a540/screenshots/orders_per_week.png)
+
+**Представление Point-in-time, которое показывает актуальные атрибуты клиента (first name, last name, email) на заданный момент времени**
  
+![PIT_customers](https://github.com/FaradG11/Otus_DE-jaffle_shop_dbtvault/blob/16f03982ad99d5afde8cff1f61b838979cb6a540/screenshots/PIT_after_new_source_adding.png)
+
